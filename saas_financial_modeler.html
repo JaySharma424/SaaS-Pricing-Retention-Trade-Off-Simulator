@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Growth & Financial Projections</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom styling for sleek sliders */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        /* Toggle Switch CSS */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4f46e5;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #4f46e5;
+        }
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: #e2e8f0;
+            transition: all 0.3s;
+        }
+        .toggle-label {
+            background-color: #cbd5e1;
+            transition: all 0.3s;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased p-4 md:p-6 lg:p-8">
+
+    <div class="max-w-[1400px] mx-auto">
+        <!-- Header -->
+        <header class="mb-6 border-b border-slate-200 pb-4">
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">SaaS Financial & Growth Modeler</h1>
+            <p class="text-slate-500 mt-1">Interactive 12-Month Projections & Trade-off Analysis</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Column: Controls (4 cols) -->
+            <div class="lg:col-span-3 space-y-5">
+                
+                <!-- Base Settings Card -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">1. Base Metrics</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Starting Subs</label>
+                            <input type="number" id="in_startSubs" value="2000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Gross Margin (%)</label>
+                                <input type="number" id="in_margin" value="80" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Base CAC ($)</label>
+                                <input type="number" id="in_baseCAC" value="45" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Growth Levers Card -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-indigo-500">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">2. Growth Levers</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Price Slider -->
+                        <div>
+                            <div class="flex justify-between mb-1 items-end">
+                                <label class="text-sm font-semibold text-slate-700">Monthly Price</label>
+                                <span class="text-lg font-bold text-indigo-600" id="val_price">$12</span>
+                            </div>
+                            <input type="range" id="in_price" min="10" max="25" step="1" value="12" oninput="updateUI()">
+                            <div class="flex justify-between text-xs text-slate-400 mt-1"><span>$10</span><span>$25</span></div>
+                        </div>
+
+                        <!-- Churn Slider -->
+                        <div>
+                            <div class="flex justify-between mb-1 items-end">
+                                <label class="text-sm font-semibold text-slate-700">Monthly Churn</label>
+                                <span class="text-lg font-bold text-indigo-600" id="val_churn">6.0%</span>
+                            </div>
+                            <input type="range" id="in_churn" min="2" max="10" step="0.1" value="6.0" oninput="updateUI()">
+                            <div class="flex justify-between text-xs text-slate-400 mt-1"><span>2%</span><span>10%</span></div>
+                        </div>
+
+                        <!-- Ad Spend Slider -->
+                        <div>
+                            <div class="flex justify-between mb-1 items-end">
+                                <label class="text-sm font-semibold text-slate-700">Monthly Ad Spend</label>
+                                <span class="text-lg font-bold text-indigo-600" id="val_adSpend">$6,750</span>
+                            </div>
+                            <input type="range" id="in_adSpend" min="3000" max="20000" step="250" value="6750" oninput="updateUI()">
+                            <div class="flex justify-between text-xs text-slate-400 mt-1"><span>$3k</span><span>$20k</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Dynamics Card -->
+                <div class="bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-700 text-white">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">3. Real-World Dynamics</h2>
+                    
+                    <div class="space-y-5">
+                        <!-- CAC Scaling -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <label class="text-sm font-medium text-slate-200">CAC Penalty factor</label>
+                                <span class="text-sm font-bold text-rose-400" id="val_cacScale">+3.0%</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-2 leading-tight">Increases CAC by this % for every $1k spent over the $6.75k baseline.</p>
+                            <input type="range" id="in_cacScale" min="0" max="10" step="0.5" value="3.0" oninput="updateUI()">
+                        </div>
+
+                        <!-- Price Churn Penalty Toggle -->
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-600">
+                            <div class="pr-3">
+                                <label class="text-sm font-medium text-slate-200">Price-Sensitivity</label>
+                                <p class="text-xs text-slate-400 leading-tight mt-1">Adds +0.5% churn for every $1 over $12 baseline.</p>
+                            </div>
+                            <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in flex-shrink-0">
+                                <input type="checkbox" name="toggle" id="in_churnPenaltyToggle" onchange="updateUI()" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
+                                <label for="in_churnPenaltyToggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-500 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Outputs (9 cols) -->
+            <div class="lg:col-span-9 space-y-6">
+                
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group">
+                        <div class="absolute inset-y-0 left-0 w-1 bg-slate-200 group-hover:bg-indigo-500 transition-colors" id="mrr_indicator"></div>
+                        <p class="text-sm text-slate-500 font-medium ml-2">Month 12 MRR</p>
+                        <div class="flex items-baseline space-x-2 ml-2">
+                            <p class="text-3xl font-bold text-slate-900 mt-1 transition-colors" id="kpi_mrr">$0</p>
+                            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-500 hidden" id="mrr_badge">Goal Hit!</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-indigo-50 p-4 rounded-xl shadow-sm border border-indigo-100">
+                        <p class="text-sm text-indigo-600 font-medium">12-Mo Cum. Profit</p>
+                        <p class="text-3xl font-bold text-indigo-900 mt-1" id="kpi_cumProfit">$0</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <p class="text-sm text-slate-500 font-medium">Blended CAC</p>
+                        <p class="text-3xl font-bold text-rose-600 mt-1" id="kpi_effCac">$0</p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <p class="text-sm text-slate-500 font-medium">Est. LTV</p>
+                        <p class="text-3xl font-bold text-emerald-600 mt-1" id="kpi_ltv">$0</p>
+                    </div>
+                </div>
+
+                <!-- Charts Area: Split into Trajectory and Tradeoff -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- MRR & Subscriber Trajectory -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="text-base font-semibold text-slate-800 mb-1">Growth Trajectory</h3>
+                        <p class="text-xs text-slate-500 mb-4">MRR vs. Active Subscribers</p>
+                        <div class="w-full h-64 relative">
+                            <canvas id="trajectoryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Trade-off Comparison -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="text-base font-semibold text-slate-800 mb-1">Strategic Trade-off Analysis</h3>
+                        <p class="text-xs text-slate-500 mb-4">12-Mo Cumulative Profit Comparison</p>
+                        <div class="w-full h-64 relative">
+                            <canvas id="tradeoffChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Waterfall Table -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-600">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">Month</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Start Subs</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-indigo-600">New Subs</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-rose-500">Churned</th>
+                                    <th scope="col" class="px-4 py-3 text-right">End Subs</th>
+                                    <th scope="col" class="px-4 py-3 text-right font-semibold">MRR</th>
+                                    <th scope="col" class="px-4 py-3 text-right font-semibold">Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table_body" class="divide-y divide-slate-100">
+                                <!-- JS will populate rows here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Currency Formatter
+        const usdFormat = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            maximumFractionDigits: 0
+        });
+        
+        // Number Formatter
+        const numFormat = new Intl.NumberFormat('en-US', {
+            maximumFractionDigits: 0
+        });
+
+        // Chart Instance Variables
+        let trajectoryChart = null;
+        let tradeoffChart = null;
+
+        // Initialize DOM listeners for number inputs
+        document.getElementById('in_startSubs').addEventListener('input', updateUI);
+        document.getElementById('in_margin').addEventListener('input', updateUI);
+        document.getElementById('in_baseCAC').addEventListener('input', updateUI);
+
+        function runSimulation(config) {
+            // Unpack config
+            const { 
+                startSubs, margin, baseCAC, price, baseChurnRate, 
+                adSpend, cacScale, applyPenalty 
+            } = config;
+            
+            // Effective CAC: Base CAC increases by 'cacScale' % for every $1000 spent over baseline $6750
+            let effectiveCAC = baseCAC;
+            if (adSpend > 6750) {
+                const overSpendK = (adSpend - 6750) / 1000;
+                const increaseFactor = 1 + (overSpendK * cacScale);
+                effectiveCAC = baseCAC * increaseFactor;
+            } else if (adSpend < 6750) {
+                 const underSpendK = (6750 - adSpend) / 1000;
+                 const decreaseFactor = Math.max(0.8, 1 - (underSpendK * cacScale));
+                 effectiveCAC = baseCAC * decreaseFactor;
+            }
+            if(effectiveCAC <= 0) effectiveCAC = 1;
+
+            // Effective Churn: Penalty of 0.5% for every $1 over base $12
+            let effectiveChurn = baseChurnRate;
+            if (applyPenalty && price > 12) {
+                effectiveChurn += (price - 12) * 0.5;
+            }
+            const churnFactor = effectiveChurn / 100;
+
+            // LTV Calculation = (Price * Gross Margin) / Churn Rate
+            const ltv = (price * margin) / churnFactor;
+
+            // Run 12-Month Simulation
+            let data = [];
+            let currentStartSubs = startSubs;
+            let cumulativeProfit = 0;
+
+            for (let month = 1; month <= 12; month++) {
+                const newSubs = adSpend / effectiveCAC;
+                const churnedSubs = currentStartSubs * churnFactor;
+                const endSubs = currentStartSubs + newSubs - churnedSubs;
+                
+                const mrr = endSubs * price;
+                const grossProfit = (mrr * margin) - adSpend;
+                cumulativeProfit += grossProfit;
+
+                data.push({
+                    month: month,
+                    startSubs: currentStartSubs,
+                    newSubs: newSubs,
+                    churnedSubs: churnedSubs,
+                    endSubs: endSubs,
+                    mrr: mrr,
+                    profit: grossProfit
+                });
+
+                currentStartSubs = endSubs;
+            }
+
+            return {
+                data: data,
+                effectiveCAC: effectiveCAC,
+                cumulativeProfit: cumulativeProfit,
+                finalMRR: data[11].mrr,
+                finalProfit: data[11].profit,
+                effectiveChurn: effectiveChurn,
+                ltv: ltv
+            };
+        }
+
+        function updateUI() {
+            // 1. Gather Current Inputs from DOM
+            const config = {
+                startSubs: parseInt(document.getElementById('in_startSubs').value) || 0,
+                margin: parseFloat(document.getElementById('in_margin').value) / 100 || 0,
+                baseCAC: parseFloat(document.getElementById('in_baseCAC').value) || 0,
+                price: parseFloat(document.getElementById('in_price').value),
+                baseChurnRate: parseFloat(document.getElementById('in_churn').value),
+                adSpend: parseFloat(document.getElementById('in_adSpend').value),
+                cacScale: parseFloat(document.getElementById('in_cacScale').value) / 100,
+                applyPenalty: document.getElementById('in_churnPenaltyToggle').checked
+            };
+
+            // Update Slider Text Labels
+            document.getElementById('val_price').innerText = usdFormat.format(config.price);
+            document.getElementById('val_churn').innerText = config.baseChurnRate.toFixed(1) + '%';
+            document.getElementById('val_adSpend').innerText = usdFormat.format(config.adSpend);
+            document.getElementById('val_cacScale').innerText = '+' + (config.cacScale * 100).toFixed(1) + '%';
+
+            // Run Primary Simulation
+            const results = runSimulation(config);
+            const d = results.data;
+
+            // Update KPI Cards
+            const mrrEl = document.getElementById('kpi_mrr');
+            const mrrBadge = document.getElementById('mrr_badge');
+            const mrrIndicator = document.getElementById('mrr_indicator');
+            
+            mrrEl.innerText = usdFormat.format(results.finalMRR);
+            document.getElementById('kpi_cumProfit').innerText = usdFormat.format(results.cumulativeProfit);
+            document.getElementById('kpi_effCac').innerText = usdFormat.format(results.effectiveCAC);
+            document.getElementById('kpi_ltv').innerText = usdFormat.format(results.ltv);
+
+            // Conditional Highlight for $40k MRR Goal
+            if (results.finalMRR >= 40000) {
+                mrrEl.classList.remove('text-slate-900');
+                mrrEl.classList.add('text-emerald-600');
+                mrrBadge.classList.remove('hidden');
+                mrrBadge.classList.add('bg-emerald-100', 'text-emerald-700');
+                mrrIndicator.classList.add('bg-emerald-500');
+                mrrIndicator.classList.remove('group-hover:bg-indigo-500', 'bg-slate-200');
+            } else {
+                mrrEl.classList.add('text-slate-900');
+                mrrEl.classList.remove('text-emerald-600');
+                mrrBadge.classList.add('hidden');
+                mrrIndicator.classList.remove('bg-emerald-500');
+                mrrIndicator.classList.add('bg-slate-200', 'group-hover:bg-indigo-500');
+            }
+
+            // Conditional Coloring for Cum Profit
+            document.getElementById('kpi_cumProfit').className = `text-3xl font-bold mt-1 ${results.cumulativeProfit < 0 ? 'text-rose-600' : 'text-indigo-900'}`;
+
+            // Update Table
+            const tbody = document.getElementById('table_body');
+            tbody.innerHTML = '';
+            d.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-4 py-2 font-medium text-slate-900">Month ${row.month}</td>
+                    <td class="px-4 py-2 text-right">${numFormat.format(row.startSubs)}</td>
+                    <td class="px-4 py-2 text-right text-indigo-600">+${numFormat.format(row.newSubs)}</td>
+                    <td class="px-4 py-2 text-right text-rose-500">-${numFormat.format(row.churnedSubs)}</td>
+                    <td class="px-4 py-2 text-right font-medium">${numFormat.format(row.endSubs)}</td>
+                    <td class="px-4 py-2 text-right font-semibold text-slate-800">${usdFormat.format(row.mrr)}</td>
+                    <td class="px-4 py-2 text-right font-semibold ${row.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${usdFormat.format(row.profit)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Update Charts
+            renderTrajectoryChart(d);
+            renderTradeoffChart(config);
+        }
+
+        function renderTrajectoryChart(data) {
+            const ctx = document.getElementById('trajectoryChart').getContext('2d');
+            
+            const labels = data.map(d => `M${d.month}`);
+            const mrrData = data.map(d => d.mrr);
+            const subsData = data.map(d => d.endSubs);
+
+            if (trajectoryChart) {
+                trajectoryChart.destroy();
+            }
+
+            trajectoryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'MRR ($)',
+                            data: mrrData,
+                            borderColor: '#4f46e5', // indigo-600
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#4f46e5',
+                            pointRadius: 3,
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Active Subscribers',
+                            data: subsData,
+                            borderColor: '#cbd5e1', // slate-300
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointBackgroundColor: '#94a3b8',
+                            pointRadius: 3,
+                            fill: false,
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 6, font: {size: 11} } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.datasetIndex === 0) {
+                                        label += usdFormat.format(context.parsed.y);
+                                    } else {
+                                        label += numFormat.format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            type: 'linear', display: true, position: 'left',
+                            grid: { color: '#f1f5f9' },
+                            ticks: { callback: value => '$' + (value / 1000) + 'k', font: {size: 10} }
+                        },
+                        y1: {
+                            type: 'linear', display: true, position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: { font: {size: 10} }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTradeoffChart(currentConfig) {
+            const ctx = document.getElementById('tradeoffChart').getContext('2d');
+            
+            // Scenario 1: Current Custom Settings (from sliders)
+            const resultCustom = runSimulation(currentConfig);
+
+            // Scenario 2: Churn Focus (Force 4% churn, Base Spend 6750)
+            const configChurnFocus = { ...currentConfig, baseChurnRate: 4.0, adSpend: 6750 };
+            const resultChurn = runSimulation(configChurnFocus);
+
+            // Scenario 3: Scale Focus (Force 6% churn, Double Spend 13500)
+            const configScaleFocus = { ...currentConfig, baseChurnRate: 6.0, adSpend: 13500 };
+            const resultScale = runSimulation(configScaleFocus);
+
+            const scenarios = ['Your Custom Setup', 'Focus: Reduce Churn (4%)', 'Focus: Scale Ads ($13.5k)'];
+            const profits = [resultCustom.cumulativeProfit, resultChurn.cumulativeProfit, resultScale.cumulativeProfit];
+
+            if (tradeoffChart) {
+                tradeoffChart.destroy();
+            }
+
+            tradeoffChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: scenarios,
+                    datasets: [{
+                        label: '12-Month Cumulative Profit',
+                        data: profits,
+                        backgroundColor: [
+                            '#818cf8', // Indigo for Custom
+                            '#10b981', // Emerald for Churn focus
+                            '#f43f5e'  // Rose for Ad Scale
+                        ],
+                        borderRadius: 4,
+                        barThickness: 40
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: context => usdFormat.format(context.parsed.y)
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: {size: 11} }
+                        },
+                        y: {
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                callback: value => '$' + (value / 1000) + 'k',
+                                font: {size: 10}
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize everything on load
+        window.onload = function() {
+            updateUI();
+        };
+
+    </script>
+</body>
+</html>
